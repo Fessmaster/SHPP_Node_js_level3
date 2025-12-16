@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div><input type="button", onclick="plus()", value="Plus"></div>
+  <div><p id="plus-field"></p></div>  
+  <div><input type="button" onclick="minus()" value="Minus"></div>
+  <div> <p id="minus-field"></p></div>
+</body>
+
+<script>
+  const Button = {
+    Plus: "PLUS",
+    Minus: "MINUS"
+  }
+  const url = "/"
+
+  function plus() {
+    fetch(url, {
+      method: "POST",
+      headers: {
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify({operator: Button.Plus})
+    })
+    .then(res => res.json())
+    .then(res => {
+      const count = res.count;
+      const field = document.getElementById('plus-field');
+      field.innerHTML = count
+    })
+  }
+    function minus() {
+    fetch(url, {
+      method: "POST",
+      headers: {
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify({operator: Button.Minus})
+    })
+    .then(res => res.json())
+    .then(res => {
+      const count = res.count;
+      const field = document.getElementById('minus-field');
+      field.innerHTML = count
+    })
+  }
+
+</script>
+</html>
