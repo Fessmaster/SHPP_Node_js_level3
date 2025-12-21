@@ -5,6 +5,7 @@ interface FormButton {
 }
 
 //Завдання 1: створіть тип AnyButtonType, який описує всі варіації кнопок
+
 type AnyButtonType = DialogButtonType | FormButton; // тільки без копіпасти літералів, будь ласка
 
 const firstButton: AnyButtonType = "Yes"
@@ -18,6 +19,7 @@ const secondButton: AnyButtonType = { type: "Buy"}
 // то при натисканні на цю кнопку відразу відбувається дія,
 // інакше викликається діалог Підтвердження, і результат натискання на кнопку Так чи Ні
 // потрапить у функцію onConfirm, яка вже далі вирішить що робити
+
 type ConfirmationHandlingFormButton = FormButton & {
   onConfirm?(param: DialogButtonType):void
 };
