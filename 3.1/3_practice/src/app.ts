@@ -7,9 +7,10 @@ interface BigObject {
 function summ(a: BigObject): number {
   const x = Object.keys(a).map((k) => {     
     const value = a[k]?.cvalue;  
-    if (typeof value === "undefined") return 2022;
-    if (typeof value === "number") return value;
-    if (typeof value === "string") return +value;
+    if (value === undefined) return 2022;
+    if (typeof value === "string" && isNaN(+value)) return 2022;
+    if (typeof value === "string") return +value;    
+    if (typeof value === "number") return value;    
     return summ(value) 
   });
 
@@ -38,7 +39,7 @@ const b = {
 }
 
 const c = {
-  hello: { cvalue: 100 },
+  hello: { cvalue: "abc" },
   world: {
     cvalue: {
       yay: {
@@ -48,10 +49,9 @@ const c = {
           }
         }
       },
-    },
-    new: null
+    },  
   },
-  hey:undefined,
+  hey: undefined,
   undefined
 };
 
