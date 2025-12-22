@@ -15,7 +15,7 @@ function summ(a: BigObject): number {
   });
 
   let sum = 0;
-  for (let elem of x) {    
+  for (const elem of x) {    
       sum += elem;
   }
   return sum;
