@@ -16,8 +16,35 @@
 //1) дженерики з кількома параметрами-типами
 //2) таку штуку як Record (globalThis.Record, якщо бути точним ;) )
 
+//Record<string, U>
 
-
-function mapObject<T, U> (obj: Record<string, T>, transformer:(val:T) => U): Record<string, U>{
-
+function mapObject<T, U> (
+  obj: Record<string, T>, 
+  transformer:(param:T) => U
+): Record<string, U> {
+  const outputObject: Record<string, U> = {};
+  const keys = Object.keys(obj);
+  for (const key of keys){
+    outputObject[key] = transformer(obj[key])
+  }
+  return outputObject
 }
+
+const obj = { "roma" : 5, "vasya": 2 };
+
+function compare(param: number): boolean{
+  return param > 2
+}
+function convert(param: number): string{
+  return param.toString()
+}
+
+const firstObj = mapObject(obj, compare)
+console.log(firstObj);
+
+const secondObj = mapObject(obj, convert)
+console.log(secondObj);
+
+
+console.log('Original object:');
+console.log(obj);
