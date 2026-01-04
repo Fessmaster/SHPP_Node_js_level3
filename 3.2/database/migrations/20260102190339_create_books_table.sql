@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS books (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  published_year INT,
+  img VARCHAR(255),
+  delete_at TIMESTAMP DEFAULT NULL
+);
