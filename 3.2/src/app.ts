@@ -1,17 +1,16 @@
 import 'dotenv/config';
-import express from 'express';
+import express, { Response } from 'express';
 import path from 'path';
 import fs from "fs/promises";
 import { pool } from './config/db.js';
-import { QueryResult } from 'mysql2';
 import { RowDataPacket } from 'mysql2'
 
 const app = express();
 const port = 3000;
-// app.use(express.json)
+app.use(express.json())
 app.use(express.static(path.join(process.cwd(), 'public')))
 
-// деталі інтервейса -------------------------------------
+
 interface IBooks extends RowDataPacket {
   title:string,
   published_year: number,
@@ -40,24 +39,53 @@ async function booksPageTemplater(obj:IBooks[], template: string) {
     .replaceAll('{title}',book.title)
     .replace('{path-to-img}',book.img)
     .replaceAll('{name}',book.name)
-  }
-  
+    .replaceAll('{published_year}',book.published_year.toString())
+  }    
   return pageTemplate  
 }
 
+const booksHeaderPath = path.join(process.cwd(), 'templates/books-page', 'books-page-header.html');
+const booksFooterPath = path.join(process.cwd(), 'templates/books-page', 'books-page-footer.html');
+const booksCartPath = path.join(process.cwd(), 'templates/books-page', 'books-page-cart.html');
+let booksHeader = '';
+let booksFooter = '';
+let booksCart = '';
 
+const adminHeaderPath = path.join(process.cwd(), 'templates/admin-template', 'admin-template-header.html');
+const adminFooterPath = path.join(process.cwd(), 'templates/admin-template', 'admin-template-footer.html');
+const adminBookItemPath = path.join(process.cwd(), 'templates/admin-template', 'admin-template-book-item.html');
 
+let adminHeader = '';
+let adminFooter = '';
+let adminBookItem = '';
 
+try {
+  booksHeader = await fs.readFile(booksHeaderPath, 'utf-8');
+  booksFooter = await fs.readFile(booksFooterPath, 'utf-8');
+  booksCart = await fs.readFile(booksCartPath, 'utf-8');
 
-const booksHeaderPath = path.join(process.cwd(), 'templates', 'books-page-header.html');
-const booksFooterPath = path.join(process.cwd(), 'templates', 'books-page-footer.html');
-const booksCartPath = path.join(process.cwd(), 'templates', 'books-page-cart.html');
-const booksHeader = await fs.readFile(booksHeaderPath, 'utf-8');
-const booksFooter = await fs.readFile(booksFooterPath, 'utf-8');
-const booksCart = await fs.readFile(booksCartPath, 'utf-8');
+  adminHeader = await fs.readFile(adminHeaderPath, 'utf-8');
+  adminFooter = await fs.readFile(adminFooterPath, 'utf-8');
+  adminBookItem = await fs.readFile(adminBookItemPath, 'utf-8');
+} catch (error) {
+  console.log('file not exist');  
+}
 
 app.get('/', async (req, res) =>{
-  res.send(booksHeader + await booksPageTemplater(booksArray, booksCart) + booksFooter)
+  res.send(adminHeader + await booksPageTemplater(booksArray, adminBookItem) + adminFooter)
+});
+
+app.post('/admin/api/v1/addBook/', async (req, res: Response) => {
+  if (req.body.bookTitle) {
+    console.log(req.body.bookTitle);
+    console.log(req.body.pathToImg);
+    console.log(req.body.publishedYear);
+    console.log(req.body.about);
+    console.log(req.body.authors);
+  } else {
+    console.log(`Cant find data. Body object:
+${req.body}`);
+  }
 })
 
 app.listen(port, () => {

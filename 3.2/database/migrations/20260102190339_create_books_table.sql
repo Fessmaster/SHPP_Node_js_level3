@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS books (
   title VARCHAR(255) NOT NULL,
   published_year INT,
   img VARCHAR(255),
+  about TEXT,
   delete_at TIMESTAMP DEFAULT NULL
 );
