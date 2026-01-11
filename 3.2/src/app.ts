@@ -18,6 +18,14 @@ interface IBooks extends RowDataPacket {
   name: string
 }
 
+interface IBook {
+  bookTitle: string,
+  publishedYear: string,
+  pathToImg: string,
+  authors: string[],
+  about: string
+}
+
 async function getAllBooks(){  
   const [books] = await pool.execute<IBooks[]>(`
     SELECT title, published_year, img, name
@@ -42,6 +50,21 @@ async function booksPageTemplater(obj:IBooks[], template: string) {
     .replaceAll('{published_year}',book.published_year.toString())
   }    
   return pageTemplate  
+}
+
+parseInt
+
+async function addBook(book: IBook) {
+  const newBook = await pool.execute(`
+    INSERT INTO books
+    (title, published_year, img, about)
+    VALUES
+    (?, ?, ?, ?);`,
+    [book.bookTitle, 
+      parseInt(book.publishedYear), 
+      book.pathToImg, 
+      book.about])
+
 }
 
 const booksHeaderPath = path.join(process.cwd(), 'templates/books-page', 'books-page-header.html');
@@ -76,16 +99,14 @@ app.get('/', async (req, res) =>{
 });
 
 app.post('/admin/api/v1/addBook/', async (req, res: Response) => {
-  if (req.body.bookTitle) {
-    console.log(req.body.bookTitle);
-    console.log(req.body.pathToImg);
-    console.log(req.body.publishedYear);
-    console.log(req.body.about);
-    console.log(req.body.authors);
-  } else {
-    console.log(`Cant find data. Body object:
-${req.body}`);
+  const {bookTitle, pathToImg, publishYear, about, authors} = req.body;
+
+  if (!bookTitle || authors.length === 0){
+    res.status(400).json({'error':`Missing fields`})
   }
+
+  const newBook = {bookTitle, pathToImg, publishYear, about, authors};
+  const result = await addNewBook(newBook);
 })
 
 app.listen(port, () => {
