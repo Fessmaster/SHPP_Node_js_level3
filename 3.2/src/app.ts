@@ -3,7 +3,7 @@ import express, { Response } from 'express';
 import path from 'path';
 import fs from "fs/promises";
 import { pool } from './config/db.js';
-import { RowDataPacket } from 'mysql2'
+import { ResultSetHeader, RowDataPacket } from 'mysql2'
 
 const app = express();
 const port = 3000;
@@ -52,18 +52,36 @@ async function booksPageTemplater(obj:IBooks[], template: string) {
   return pageTemplate  
 }
 
-parseInt
-
 async function addBook(book: IBook) {
-  const newBook = await pool.execute(`
-    INSERT INTO books
-    (title, published_year, img, about)
-    VALUES
-    (?, ?, ?, ?);`,
-    [book.bookTitle, 
-      parseInt(book.publishedYear), 
-      book.pathToImg, 
-      book.about])
+  const authorsID = [];
+  const addBookSQL = `
+INSERT INTO books
+(title, published_year, img, about)
+VALUES
+(?, ?, ?, ?);`;
+  
+  const addAuthorSQL = `
+INSERT INTO authors (name) VALUES (?) 
+ON DUPLICATE KEY UPDATE id=LAST_INSERT_ID(id);`;
+
+const addAuthorBookSQL = `
+INSERT INTO authors_books
+(author_id, book_id)
+VALUES
+(?,?);`;
+
+  const {bookTitle, publishedYear, about, authors, pathToImg} = book;
+  const bookFields = [bookTitle, pathToImg, about, publishedYear];
+  const newBook = await pool.execute(addBookSQL, bookFields);
+
+  for (const author of authors){
+    const result = await pool.execute(addAuthorSQL, [author])
+    authorsID.push(result)
+  }
+
+  for (const author:ResultSetHeader of authorsID){
+    await pool.execute(addAuthorBookSQL, [author.insertID, ])
+  }
 
 }
 

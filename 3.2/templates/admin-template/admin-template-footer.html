@@ -80,10 +80,10 @@
 <script> 
   function addBook(){
   const apiURL = 'http://localhost:3000/admin/api/v1/addBook';
-  const bookTitle = document.getElementById('title')?.value;
-  const pathToImg = document.getElementById('img')?.value;
-  const publishedYear = document.getElementById('published_year')?.value;
-  const about = document.getElementById('about')?.value;
+  const bookTitle = document.getElementById('title')?.value.trim();
+  const pathToImg = document.getElementById('img')?.value.trim();
+  const publishedYear = document.getElementById('published_year')?.value.trim();
+  const about = document.getElementById('about')?.value.trim();
   const authors = [
     document.getElementById('author1')?.value,
     document.getElementById('author2')?.value,
@@ -94,8 +94,6 @@
     alert(`Потрібно заповнити обов'язкові поля: Назва книги та Автор`);
     return;
   }
-
-  console.log(authors);
   
   const newBook = {
     bookTitle: bookTitle,
@@ -104,7 +102,6 @@
     about: about,
     authors
   } 
-
 
   fetch(apiURL, {
   method: 'POST',
@@ -115,7 +112,7 @@
 
 })
 .then(response => response.json())
-.then(result => console.log('Успіх:', result))
-.catch(error => console.error('Помилка:', error))
+.then(result => console.log('Data send:', result))
+.catch(error => console.error('Some error:', error))
 }
 </script>
