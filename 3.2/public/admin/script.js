@@ -25,7 +25,7 @@ function addBook(){
 
   const fileInput = document.getElementById('img');
   if (fileInput.files[0]){
-    formData.append('book-img', file);
+    formData.append('book-img', fileInput.files[0]);
   }
 
   fetch(apiURL, {

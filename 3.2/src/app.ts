@@ -4,25 +4,11 @@ import path from 'path';
 import fs from "fs/promises";
 import { pool } from './config/db.js';
 import { ResultSetHeader, RowDataPacket } from 'mysql2'
-
-import multer from 'multer';
-
-//Setting for multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'public/books-img/');
-  },
-  filename: (req, file, cb) => {
-    const suffix = Date.now();
-    cb(null, file.fieldname + suffix + path.extname(file.originalname))
-  }
-})
-// Init multer middleware
-const upload = multer({storage: storage})
+import { upload } from './middlewares/uploadBook.js';
 
 const app = express();
 const port = 3000;
-app.use(express.json())
+// app.use(express.json())
 app.use(express.static(path.join(process.cwd(), 'public')))
 
 
@@ -36,7 +22,7 @@ interface IBooks extends RowDataPacket {
 interface IBook {
   bookTitle: string,
   publishedYear: string,
-  pathToImg: string,
+  pathToImg: string | null,
   authors: string[],
   about: string
 }
@@ -99,7 +85,7 @@ VALUES
     const result = await pool.execute<ResultSetHeader>(addAuthorBookSQL, [author.insertId, newBook[0].insertId])
     console.log(`Author_Book: ${result[0]}`);
   }
-  return true;
+  return true; // TODO Додати якесь конкретне значення що інформує про результати додавання книги.
 }
 
 const booksHeaderPath = path.join(process.cwd(), 'templates/books-page', 'books-page-header.html');
@@ -131,16 +117,37 @@ try {
 
 app.get('/', async (req, res) =>{
   res.send(adminHeader + await booksPageTemplater(booksArray, adminBookItem) + adminFooter)
-});
+}); // FIXME Неоновлюються дані адмінки без перезапуску додатку!
 
-app.post('/admin/api/v1/addBook/', async (req, res: Response) => {  
-  
-  if (!req.body.bookTitle || req.body.authors.length === 0){
-    res.status(400).json({'error':`Missing fields`})
-  }
-  const newBook = req.body as IBook;
+app.post('/admin/api/v1/addBook/', upload.single('book-img'),  async (req, res: Response) => {  
+  try {
+    
+    if (!req.body.bookTitle || JSON.parse(req.body.authors).length === 0){
+      res.status(400).json({'error':`Missing fields`})
+    }
+    
+    const { bookTitle, publishedYear, about} = req.body;
+    const authors = JSON.parse(req.body.authors);
+
+    let pathToImg = null;
+    if(req.file){
+      pathToImg = 'books-img/' + req.file.filename;
+    }    
+    const newBook: IBook = {
+      bookTitle: bookTitle,
+      publishedYear: publishedYear,
+      pathToImg: pathToImg,
+      authors: authors,
+      about: about,
+    };
 
   const result = await addNewBook(newBook);
+    
+  } catch (error: any) {
+    console.log(`Some error during adding new book: ${error}`);
+    res.status(500).json({error: error.message})
+  }
+  
 })
 
 
