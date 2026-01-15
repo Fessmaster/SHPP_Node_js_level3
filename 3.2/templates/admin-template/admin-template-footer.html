@@ -31,14 +31,15 @@
                   placeholder="Рік видання"
                   aria-label="default input example"
                   id="published_year"
-                />
-                <input class="form-control" type="file" id="img" />
+                />               
+                <input class="form-control" type="file" id="img" accept="image/png, image/jpeg">                
 
                 <div class="placeholderr">
-                  <div class="placeholder col-12 " style="height: 170px; width: 100px"></div>
+                  <div id="placeholder" class="placeholder col-12 " style="height: 170px; width: 100px"></div>
+                  <img src="" height="" alt="" id="img-preview">
                 </div>
 
-                <button type="button" class="btn btn-success" onclick="addBook('title', 'published_year', 'img', 'about', 'name1', 'name2', 'name3')">Додати ></button>
+                <button type="button" class="btn btn-success" onclick="addBook()">Додати ></button>
               </div>
               <div class="col">
                 <input
@@ -76,43 +77,3 @@
     </div>
   </body>
 </html>
-
-<script> 
-  function addBook(){
-  const apiURL = 'http://localhost:3000/admin/api/v1/addBook';
-  const bookTitle = document.getElementById('title')?.value.trim();
-  const pathToImg = document.getElementById('img')?.value.trim();
-  const publishedYear = document.getElementById('published_year')?.value.trim();
-  const about = document.getElementById('about')?.value.trim();
-  const authors = [
-    document.getElementById('author1')?.value,
-    document.getElementById('author2')?.value,
-    document.getElementById('author3')?.value
-  ].filter(author => author.trim())
-
-  if (!bookTitle || authors.length === 0){
-    alert(`Потрібно заповнити обов'язкові поля: Назва книги та Автор`);
-    return;
-  }
-  
-  const newBook = {
-    bookTitle: bookTitle,
-    pathToImg: pathToImg,
-    publishedYear: publishedYear,
-    about: about,
-    authors
-  } 
-
-  fetch(apiURL, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify(newBook) 
-
-})
-.then(response => response.json())
-.then(result => console.log('Data send:', result))
-.catch(error => console.error('Some error:', error))
-}
-</script>

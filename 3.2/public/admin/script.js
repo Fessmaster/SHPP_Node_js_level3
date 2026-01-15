@@ -1,34 +1,77 @@
-function addBook(title, year, img, about, name1, name2, name3){
-  const apiURL = 'http://localhost:3000/admin/api/';
-  const apiVersion = 'v1/';
-  const param = 'addBook';
-
+function addBook(){
+  const apiURL = 'http://localhost:3000/admin/api/v1/addBook';
+  const formData = new FormData();
   
+  const bookTitle = document.getElementById('title')?.value.trim();
+  formData.append('bookTitle', bookTitle);
+  
+  const publishedYear = document.getElementById('published_year')?.value.trim();
+  formData.append('publishedYear', publishedYear);
+
+  const about = document.getElementById('about')?.value.trim();
+  formData.append('about', about);
+
   const authors = [
-    document.getElementById(name1),
-    document.getElementById(name2),
-    document.getElementById(name3)
-  ].filter(name => name?.trim());
-  
-  const newBook = {
-    title: document.getElementById(title),
-    published_year: document.getElementById(year),
-    img: document.getElementById(img),
-    about: document.getElementById(about),
-    author: authors
-  };
+    document.getElementById('author1')?.value,
+    document.getElementById('author2')?.value,
+    document.getElementById('author3')?.value
+  ].filter(author => author.trim());
+  formData.append('authors', JSON.stringify(authors));
 
- 
+  if (!bookTitle || authors.length === 0){
+    alert(`Потрібно заповнити обов'язкові поля: Назва книги та Автор`);
+    return;
+  }
 
+  const fileInput = document.getElementById('img');
+  if (fileInput.files[0]){
+    formData.append('book-img', file);
+  }
+
+  fetch(apiURL, {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(response => {
+    console.log(`New book was added: ${response}`);
+  })
+  .catch(error => console.log(`Some error occurred while adding new book ${error}`)) 
   
-  fetch(apiURL + apiVersion + param, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify(userData) 
+}
+
+// Обробка інпута файла
+
+const fileInput = document.getElementById('img');
+console.log(`FileInput: ${fileInput}`);
+let file;
+
+fileInput.addEventListener('change', event => {
+  const target = event.target
+
+  file = target.files ? target.files[0] : null;
+
+  if (!file){
+    console.log('File not added');
+    return
+  }
+
+  console.log(`File name: ${file.name}`);
+  console.log(`File size: ${file.size} byte`);
+
+  previewImg(file);
 })
-.then(response => response.json())
-.then(result => console.log('Успіх:', result))
-.catch(error => console.error('Помилка:', error))
+
+function previewImg(file){
+  const reader = new FileReader();
+
+  reader.onload = (e) => {
+    const img = document.getElementById('img-preview');
+    const placeholder = document.getElementById('placeholder')
+    placeholder.style.display = 'none';
+    img.src = e.target.result;
+    img.height = 170;
+    img.style.display = 'inline-block'
+  }
+  reader.readAsDataURL(file)
 }

@@ -5,6 +5,21 @@ import fs from "fs/promises";
 import { pool } from './config/db.js';
 import { ResultSetHeader, RowDataPacket } from 'mysql2'
 
+import multer from 'multer';
+
+//Setting for multer storage
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'public/books-img/');
+  },
+  filename: (req, file, cb) => {
+    const suffix = Date.now();
+    cb(null, file.fieldname + suffix + path.extname(file.originalname))
+  }
+})
+// Init multer middleware
+const upload = multer({storage: storage})
+
 const app = express();
 const port = 3000;
 app.use(express.json())
@@ -52,8 +67,8 @@ async function booksPageTemplater(obj:IBooks[], template: string) {
   return pageTemplate  
 }
 
-async function addBook(book: IBook) {
-  const authorsID = [];
+async function addNewBook(book: IBook) {
+  const authorsID:ResultSetHeader[] = [];
   const addBookSQL = `
 INSERT INTO books
 (title, published_year, img, about)
@@ -71,18 +86,20 @@ VALUES
 (?,?);`;
 
   const {bookTitle, publishedYear, about, authors, pathToImg} = book;
-  const bookFields = [bookTitle, pathToImg, about, publishedYear];
-  const newBook = await pool.execute(addBookSQL, bookFields);
+  const bookFields = [bookTitle, parseInt(publishedYear), pathToImg, about];
+  const newBook = await pool.execute<ResultSetHeader>(addBookSQL, bookFields);
+ 
 
   for (const author of authors){
-    const result = await pool.execute(addAuthorSQL, [author])
-    authorsID.push(result)
+    const result = await pool.execute<ResultSetHeader>(addAuthorSQL, [author])
+    authorsID.push(result[0])    
   }
 
-  for (const author:ResultSetHeader of authorsID){
-    await pool.execute(addAuthorBookSQL, [author.insertID, ])
+  for (const author of authorsID){    
+    const result = await pool.execute<ResultSetHeader>(addAuthorBookSQL, [author.insertId, newBook[0].insertId])
+    console.log(`Author_Book: ${result[0]}`);
   }
-
+  return true;
 }
 
 const booksHeaderPath = path.join(process.cwd(), 'templates/books-page', 'books-page-header.html');
@@ -116,16 +133,17 @@ app.get('/', async (req, res) =>{
   res.send(adminHeader + await booksPageTemplater(booksArray, adminBookItem) + adminFooter)
 });
 
-app.post('/admin/api/v1/addBook/', async (req, res: Response) => {
-  const {bookTitle, pathToImg, publishYear, about, authors} = req.body;
-
-  if (!bookTitle || authors.length === 0){
+app.post('/admin/api/v1/addBook/', async (req, res: Response) => {  
+  
+  if (!req.body.bookTitle || req.body.authors.length === 0){
     res.status(400).json({'error':`Missing fields`})
   }
+  const newBook = req.body as IBook;
 
-  const newBook = {bookTitle, pathToImg, publishYear, about, authors};
   const result = await addNewBook(newBook);
 })
+
+
 
 app.listen(port, () => {
   console.log(`Server listen on port ${port}`);
