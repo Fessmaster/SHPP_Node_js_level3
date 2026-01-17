@@ -12,6 +12,8 @@ const port = 3000;
 app.use(express.static(path.join(process.cwd(), 'public')))
 
 
+
+
 interface IBooks extends RowDataPacket {
   title:string,
   published_year: number,
@@ -38,7 +40,7 @@ async function getAllBooks(){
   return books  
 }
 
-const booksArray = await getAllBooks();
+
 async function booksPageTemplater(obj:IBooks[], template: string) {
   let pageTemplate = ''
   for (const book of obj){
@@ -116,8 +118,10 @@ try {
 }
 
 app.get('/', async (req, res) =>{
-  res.send(adminHeader + await booksPageTemplater(booksArray, adminBookItem) + adminFooter)
-}); // FIXME Неоновлюються дані адмінки без перезапуску додатку!
+  const booksArray = await getAllBooks();
+  const adminBooksList = await booksPageTemplater(booksArray, adminBookItem);
+  res.send(adminHeader + adminBooksList + adminFooter)
+}); // TODO оновлювати список одразу після додавання нової книги
 
 app.post('/admin/api/v1/addBook/', upload.single('book-img'),  async (req, res: Response) => {  
   try {
