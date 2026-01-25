@@ -31,7 +31,6 @@ async function templateLoader() {
       console.log(`An error occurred while adding template to collection`);
     }
   }
-
   return templateCollection;
 }
 
