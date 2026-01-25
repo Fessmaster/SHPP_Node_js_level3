@@ -5,6 +5,8 @@ import fs from "fs/promises";
 import { pool } from './config/db.js';
 import { ResultSetHeader, RowDataPacket } from 'mysql2'
 import { upload } from './middlewares/uploadBook.js';
+import { render } from './templater/render.js';
+import { templates } from './templater/templateLoader.js';
 
 const app = express();
 const port = 3000;
@@ -31,28 +33,16 @@ interface IBook {
 
 async function getAllBooks(){  
   const [books] = await pool.execute<IBooks[]>(`
-    SELECT title, published_year, img, name
-    FROM authors_books
-    JOIN
-    books ON books.id = book_id
-    JOIN
-    authors ON authors.id = author_id;`);    
+    SELECT 
+    books.title, 
+    books.published_year, 
+    books.img, 
+    GROUP_CONCAT(authors.name SEPARATOR ', ') AS authors_list 
+FROM authors_books
+JOIN books ON books.id = authors_books.book_id
+JOIN authors ON authors.id = authors_books.author_id
+GROUP BY books.id;`);    
   return books  
-}
-
-
-async function booksPageTemplater(obj:IBooks[], template: string) {
-  let pageTemplate = ''
-  for (const book of obj){
-    const currentBook = template; 
-    
-    pageTemplate+=currentBook
-    .replaceAll('{title}',book.title)
-    .replace('{path-to-img}',book.img)
-    .replaceAll('{name}',book.name)
-    .replaceAll('{published_year}',book.published_year.toString())
-  }    
-  return pageTemplate  
 }
 
 async function addNewBook(book: IBook) {
@@ -97,31 +87,32 @@ let booksHeader = '';
 let booksFooter = '';
 let booksCart = '';
 
-const adminHeaderPath = path.join(process.cwd(), 'templates/admin-template', 'admin-template-header.html');
-const adminFooterPath = path.join(process.cwd(), 'templates/admin-template', 'admin-template-footer.html');
-const adminBookItemPath = path.join(process.cwd(), 'templates/admin-template', 'admin-template-book-item.html');
-
-let adminHeader = '';
-let adminFooter = '';
-let adminBookItem = '';
-
 try {
   booksHeader = await fs.readFile(booksHeaderPath, 'utf-8');
   booksFooter = await fs.readFile(booksFooterPath, 'utf-8');
   booksCart = await fs.readFile(booksCartPath, 'utf-8');
-
-  adminHeader = await fs.readFile(adminHeaderPath, 'utf-8');
-  adminFooter = await fs.readFile(adminFooterPath, 'utf-8');
-  adminBookItem = await fs.readFile(adminBookItemPath, 'utf-8');
+  
 } catch (error) {
   console.log('file not exist');  
 }
 
-app.get('/', async (req, res) =>{
+app.get('/admin', async (req, res) =>{
   const booksArray = await getAllBooks();
-  const adminBooksList = await booksPageTemplater(booksArray, adminBookItem);
-  res.send(adminHeader + adminBooksList + adminFooter)
-}); // TODO оновлювати список одразу після додавання нової книги
+  const adminTemplateHeader = templates?.get('admin-template-head');
+  const layout = templates?.get('layout')  
+  let booksList = '';
+  for (const book of booksArray) { //TODO Переписати через map-метод масивів
+    booksList += await render(book, templates?.get('admin-template-books'))
+  }
+  const adminTemplateBody = await render({'books': booksList}, templates?.get('admin-template-body'))
+  const adminTemplate = await render ({
+    'head': adminTemplateHeader, 
+    'body': adminTemplateBody
+  }, layout);
+  
+  res.send(adminTemplate);
+}); 
+// TODO оновлювати список одразу після додавання нової книги
 
 app.post('/admin/api/v1/addBook/', upload.single('book-img'),  async (req, res: Response) => {  
   try {

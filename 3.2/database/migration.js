@@ -14,7 +14,17 @@ async function migration() {
 
     // get array of files names
     const migrationDir = path.join(process.cwd(), './database/migrations')
-    const migrationsFiles = (await fs.readdir(migrationDir)).sort();
+    let migrationFiles = [];
+    try {
+      migrationFiles = (await fs.readdir(migrationDir)).sort();      
+    } catch (error) {
+      console.log(`An error occurred while reading migrations files`);
+    }
+
+    if (migrationFiles.length === 0){
+      console.log('Migration files are missing');
+      return;
+    }
     
     // added migrations if it's new
     for (const file of migrationsFiles) {
