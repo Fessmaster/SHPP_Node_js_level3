@@ -4,14 +4,16 @@ import { IBook, IBooks } from "../types/types.js";
 
 export async function getAllBooks() {
   const [books] = await pool.execute<IBooks[]>(`
-SELECT 
+SELECT
+books.id,
 books.title, 
 books.published_year, 
-books.img, 
+books.img,
 GROUP_CONCAT(authors.name SEPARATOR ', ') AS authors_list 
 FROM authors_books
 JOIN books ON books.id = authors_books.book_id
 JOIN authors ON authors.id = authors_books.author_id
+WHERE books.delete_at IS NULL
 GROUP BY books.id;`);
   return books;
 }
@@ -47,8 +49,18 @@ VALUES
     const result = await pool.execute<ResultSetHeader>(addAuthorBookSQL, [
       author.insertId,
       newBook[0].insertId,
-    ]);
-    console.log(`Author_Book: ${result[0]}`);
+    ]);    
   }
   return true; // TODO Додати якесь конкретне значення що інформує про результати додавання книги.
+}
+
+export async function deleteBook(id: number) {
+  const deleteSQL = `
+  UPDATE books 
+  SET books.delete_at = NOW()
+  WHERE books.id = ?;`  
+
+  const result = await pool.execute(deleteSQL, [id])
+
+  return result;
 }

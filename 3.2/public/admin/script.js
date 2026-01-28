@@ -40,6 +40,25 @@ function addBook(){
   
 }
 
+
+function deleteBook(id){
+  const URL = 'http://localhost:3000/admin/api/v1/deleteBook'
+  const request = JSON.stringify({id: id})
+
+  fetch(URL, {
+    method: 'POST',
+    headers:{
+      'Content-Type': 'application/json'
+    },
+    body: request,
+    credentials: 'include'
+  })
+  .then(res => res.json())
+  .then(res => console.log(res))
+  .catch(err => console.log(`An error occurred while deleting book with id ${id}`))
+
+}
+
 // Обробка інпута файла
 
 const fileInput = document.getElementById('img');
