@@ -3,6 +3,7 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { IBook, IBooks } from "../types/types.js";
 
 export async function getAllBooks() {
+  // authors group by GROUP_CONCAT and separate with ','
   const [books] = await pool.execute<IBooks[]>(`
 SELECT
 books.id,
@@ -18,8 +19,8 @@ GROUP BY books.id;`);
   return books;
 }
 
-export async function addNewBook(book: IBook) {
-  const authorsID: ResultSetHeader[] = [];
+export async function addNewBook(book: IBook) {  
+  const connection = await pool.getConnection();
   const addBookSQL = `
 INSERT INTO books
 (title, published_year, img, about)
@@ -38,20 +39,28 @@ VALUES
 
   const { bookTitle, publishedYear, about, authors, pathToImg } = book;
   const bookFields = [bookTitle, parseInt(publishedYear), pathToImg, about];
-  const newBook = await pool.execute<ResultSetHeader>(addBookSQL, bookFields);
+  try {
+    await connection.beginTransaction();
+    const [bookResult] = await connection.execute<ResultSetHeader>(addBookSQL, bookFields);
+    const bookId = bookResult.insertId;
+  
+    for (const authorName of authors) {
+      const [authorResult] = await connection.execute<ResultSetHeader>(addAuthorSQL, [authorName]);
+      const authorId = authorResult.insertId;
 
-  for (const author of authors) {
-    const result = await pool.execute<ResultSetHeader>(addAuthorSQL, [author]);
-    authorsID.push(result[0]);
-  }
+      await connection.execute(addAuthorBookSQL, [authorId, bookId])
+    }  
 
-  for (const author of authorsID) {
-    const result = await pool.execute<ResultSetHeader>(addAuthorBookSQL, [
-      author.insertId,
-      newBook[0].insertId,
-    ]);    
-  }
-  return true; // TODO Додати якесь конкретне значення що інформує про результати додавання книги.
+    await connection.commit();
+    console.log(`New book added to DB with ID: ${bookId}`);
+    return {success: true, id: bookId}
+  } catch (error) {
+    await connection.rollback();
+    console.log('An error occurred while adding new book');
+    throw error;    
+  } finally {
+    connection.release();
+  }  
 }
 
 export async function deleteBook(id: number) {
@@ -60,7 +69,7 @@ export async function deleteBook(id: number) {
   SET books.delete_at = NOW()
   WHERE books.id = ?;`  
 
-  const result = await pool.execute(deleteSQL, [id])
+  const [result] = await pool.execute<ResultSetHeader>(deleteSQL, [id])  
 
-  return result;
+  return result.affectedRows;
 }

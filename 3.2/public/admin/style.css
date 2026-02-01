@@ -5,3 +5,8 @@ html {
 #img-preview {
   display: none;
 }
+
+.admin-header{
+  display: flex;
+  justify-content: space-between;
+}

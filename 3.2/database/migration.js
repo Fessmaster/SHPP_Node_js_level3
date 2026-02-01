@@ -1,5 +1,3 @@
-// import dotenv from 'dotenv';
-// dotenv.config();
 import 'dotenv/config';
 import {pool} from '../dist/config/db.js';
 import fs from 'fs/promises';
@@ -27,7 +25,7 @@ async function migration() {
     }
     
     // added migrations if it's new
-    for (const file of migrationsFiles) {
+    for (const file of migrationFiles) {
       const [isMigrate] = await pool.execute('SELECT id FROM migrations WHERE file_name = ?;', [file]);
       if (isMigrate.length !== 0) {
         console.log(`Migration ${file} was added early`);
