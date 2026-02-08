@@ -1,10 +1,10 @@
 import express from "express";
 import { Router, Response } from "express";
-import { getAllBooks, deleteBook } from "../utilities/utils.js";
+import { getBooksCollection, deleteBook } from "../utilities/utils.js";
 import { templates } from "../templater/templateLoader.js";
 import { render } from "../templater/render.js";
 import { upload } from "../middlewares/uploadBook.js";
-import { IBook } from "../types/types.js";
+import { IBook, IParams } from "../types/types.js";
 import { addNewBook } from "../utilities/utils.js";
 import { createSession } from "../middlewares/session.js";
 import { pool } from "../config/db.js";
@@ -35,8 +35,16 @@ router.get("/", async (req: MyRequest, res) => {
     return;
     }
 
+      const { offset, search, author, year } = req.query
+      const params = {
+        offset: offset ? Number(offset) : 0,
+        search: search ? String(search) : undefined,
+        author: author ? Number(author) : undefined,
+        year: year ? Number(year) : undefined
+      }
+
   try {
-    const booksArray = await getAllBooks();
+    const booksArray = await getBooksCollection({...params, limit: 20});
     const adminTemplateHeader = templates?.get("admin-template-head");
     const adminTemplateBody = templates?.get("admin-template-body");
     const bookTemplate = templates?.get("admin-template-books");

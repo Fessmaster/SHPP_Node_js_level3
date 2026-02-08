@@ -1,0 +1,18 @@
+.pagination{
+  margin: 0;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.pagination img {
+  height: 40px;
+}
+
+#arrow-back {
+  margin-left: 20px;
+}
+
+#arrow-forward {
+  margin-right: 20px;
+}

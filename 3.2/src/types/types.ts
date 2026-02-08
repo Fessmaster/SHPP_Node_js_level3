@@ -1,9 +1,19 @@
 import { RowDataPacket } from "mysql2";
-export interface IBooks extends RowDataPacket {
+export interface IBooksDB extends RowDataPacket {
   title: string;
   published_year: number;
-  img: string;
-  name: string;
+  img: string;  
+  authors_list: string
+}
+
+export interface IBooksView {
+  title: string;
+  published_year: number;
+  img: string;  
+  authors_list:{
+    id: number,
+    author: string
+  }[]
 }
 
 export interface IBook {
@@ -12,4 +22,12 @@ export interface IBook {
   pathToImg: string | null;
   authors: string[];
   about: string;
+}
+
+export interface IParams {
+  offset: number,
+  limit: number,
+  search: string | undefined,
+  author: number | undefined,
+  year: number | undefined
 }

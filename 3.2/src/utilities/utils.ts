@@ -1,22 +1,52 @@
 import { pool } from "../config/db.js";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { IBook, IBooks } from "../types/types.js";
+import { IBook, IBooksDB, IParams } from "../types/types.js";
+import { RequestHandler } from "express";
+import QueryString, { ParsedQs } from "qs";
 
-export async function getAllBooks() {
-  // authors group by GROUP_CONCAT and separate with ','
-  const [books] = await pool.execute<IBooks[]>(`
+export async function getBooksCollection(params: IParams) {
+  const {offset, search, author, year, limit} = params;  
+  const values = []
+  let sql = `
 SELECT
 books.id,
 books.title, 
 books.published_year, 
 books.img,
-GROUP_CONCAT(authors.name SEPARATOR ', ') AS authors_list 
+GROUP_CONCAT(CONCAT(authors.id,'****',authors.name) SEPARATOR'|') AS authors_list
 FROM authors_books
 JOIN books ON books.id = authors_books.book_id
 JOIN authors ON authors.id = authors_books.author_id
-WHERE books.delete_at IS NULL
-GROUP BY books.id;`);
-  return books;
+WHERE books.delete_at IS NULL`;
+
+  if (search){
+    sql +=' AND books.title LIKE ?';
+    values.push(`%${search}%`)
+  }
+  if (author){
+    sql += ' AND authors.id = ?';
+    values.push(author)
+  }
+  if (year){
+    sql += ' AND books.published_year = ?';
+    values.push(year)
+  }
+
+  sql += `  
+GROUP BY books.id
+LIMIT ? OFFSET ?;
+  `
+  values.push(limit);
+  values.push(offset);
+
+  try {
+    const [books] = await pool.query<IBooksDB[]>(sql, values);  
+    return books;    
+  } catch ( err ) {    
+    console.log(`Bad sql request`);
+    console.log(err);
+    return []
+  }
 }
 
 export async function addNewBook(book: IBook) {  
