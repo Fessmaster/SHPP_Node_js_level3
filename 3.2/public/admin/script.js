@@ -13,6 +13,12 @@ function addBook() {
   const publishedYear = document.getElementById("published_year")?.value.trim();
   formData.append("publishedYear", publishedYear);
 
+  const pagesCount = document.getElementById("pages_count")?.value.trim();
+  formData.append("pagesCount", pagesCount);
+
+  const isbn = document.getElementById("isbn")?.value.trim();
+  formData.append("isbn", isbn);
+
   const about = document.getElementById("about")?.value.trim();
   formData.append("about", about);
 
