@@ -33,16 +33,18 @@ router.get("/", async (req, res) => {
     const booksTemplateBody = templates?.get("books-template-body") || "";
     const cartTemplate = templates?.get("books-template-cart") || "";
     const layout = templates?.get("layout") || "";
-    const pagination = { arrow_back: "hidden", arrow_forward: "hidden" };
+    const pagination = { 
+      arrow_back: 'style="visibility: hidden"', 
+      arrow_forward: 'style="visibility: hidden"'};
 
     const parsedBookArray = parserBookContent(booksArray);
 
     if (booksArray.length > limit) {
-      pagination.arrow_forward = "visible";
+      pagination.arrow_forward = 'style="visibility: visible"';
       booksArray.pop();
     }
     if (params.offset > 0) {
-      pagination.arrow_back = "visible";
+      pagination.arrow_back = 'style="visibility: visible"';
     }
 
     const booksList = parsedBookArray.map((book) => {
