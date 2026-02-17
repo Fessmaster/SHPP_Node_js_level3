@@ -11,12 +11,9 @@ function orderBook(id) {
     .then((res) => res.json())
     .then((response) => {
       if (response.status === "ok") {
-        // const modal = document.getElementById("modal-order");
-        // const orderModal = $("#modal-order").modal("show");
-
-        // orderModal.show();
-
-        $('#modal-order').modal('show'); 
+        const bookTitle = document.getElementById('title').innerHTML;
+        $('#modalMessageBody').text(`Книгу "${bookTitle}" ви можете забрати за адресою...`);
+        $('#model-order').modal('show');
 
         console.log(`Книгу замовлено!`);
       }
