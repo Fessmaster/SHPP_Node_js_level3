@@ -201,10 +201,21 @@ export async function updateViews(id: number) {
 UPDATE books
 SET books.views = books.views + 1
 WHERE books.id = ?`;
-  try {
-    
+  try {    
     const [updatedBook] = await pool.execute(sql, [id]);
   } catch (error) {
     console.log(`Error while update views`);
+  }
+}
+
+export async function updateOrders(id: number) {
+  const sql = `
+UPDATE books
+SET books.orders = books.orders + 1
+WHERE books.id = ?`;
+  try {    
+    const [updatedBook] = await pool.execute(sql, [id]);
+  } catch (error) {
+    console.log(`Error while update orders`);
   }
 }

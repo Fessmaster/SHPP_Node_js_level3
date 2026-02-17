@@ -16,3 +16,11 @@
 #arrow-forward {
   margin-right: 20px;
 }
+
+.modal {
+    z-index: 1060 !important;
+    display: none;
+}
+.modal-backdrop {
+    z-index: 1050 !important;
+}

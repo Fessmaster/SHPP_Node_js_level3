@@ -7,7 +7,7 @@ import booksRouter from "./router/books.js"
 
 const app = express();
 const port = 3000;
-// app.use(express.json())
+app.use(express.json())
 app.use(express.static(path.join(process.cwd(), "public")));
 app.use('/admin', adminRouter)
 app.use('/', booksRouter)

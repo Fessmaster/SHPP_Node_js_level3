@@ -1,5 +1,31 @@
 const BASE_URL = "http://localhost:3000";
 
+function orderBook(id) {
+  fetch(BASE_URL + "/books/order/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ id: id }),
+  })
+    .then((res) => res.json())
+    .then((response) => {
+      if (response.status === "ok") {
+        // const modal = document.getElementById("modal-order");
+        // const orderModal = $("#modal-order").modal("show");
+
+        // orderModal.show();
+
+        $('#modal-order').modal('show'); 
+
+        console.log(`Книгу замовлено!`);
+      }
+    })
+    .catch((err) => {
+      console.log(`Some error while ordering book - ${err}`);
+    });
+}
+
 function sendQuery(obj) {
   const defaultQuery = {
     offset: 0,
@@ -17,68 +43,50 @@ function sendQuery(obj) {
 function updateParams(updates) {
   const params = new URLSearchParams(window.location.search);
 
-  for (const [key, value] of Object.entries(updates)){
-    params.set(key, value)
+  for (const [key, value] of Object.entries(updates)) {
+    params.set(key, value);
   }
-  if (!updates.offset){
-    params.set('offset', 0)
+  if (!updates.offset) {
+    params.set("offset", 0);
   }
   const queryObject = Object.fromEntries(params.entries());
-  sendQuery(queryObject);  
-
+  sendQuery(queryObject);
 }
-
 
 const searchField = document.getElementById("search");
 searchField.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
-    e.preventDefault();    
+    e.preventDefault();
     const searchParam = searchField.value;
-
-    updateParams({search: searchParam})
-
+    updateParams({ search: searchParam });
   }
 });
-
-//TODO Доробити !!!!!!!!
-
-// function getQueryData (elem){
-  
-// }
 
 const contentBlock = document.getElementById("content");
 contentBlock.addEventListener("click", (e) => {
   const params = e.target.closest("[data-filter]");
-  if (params){
+  if (params) {
     const filter = params.dataset.filter;
     const value = params.dataset.value;
-    const query =    
-    updateParams({
-      [filter]: value
-    })
+    const query = updateParams({
+      [filter]: value,
+    });
   }
-
+  const order = e.target.closest("[data-order]");
+  if (order) {
+    const id = order.dataset.order;
+    orderBook(id);
+  }
 });
-
-function getOffsetData(elem) {
-  const offset = Number(elem.dataset.offset); 
-  const params = new URLSearchParams(window.location.search);
-  const currentOffset = Number(params.get("offset")) || 0;
-  params.set("offset", currentOffset + offset);
-  const queryObject = Object.fromEntries(params.entries());
-
-  sendQuery(queryObject);
-}
 
 const pagination = document.getElementById("pagination");
 pagination.addEventListener("click", (e) => {
-  const arrowBack = e.target.closest(".arrow-back");
-  if (arrowBack) {
-    getOffsetData(arrowBack);
-  }
-
-  const arrowForward = e.target.closest(".arrow-forward");
-  if (arrowForward) {
-    getOffsetData(arrowForward)
+  const arrow = e.target.closest("[data-offset]");
+  if (arrow) {
+    const currentOffset = new URLSearchParams(window.location.search).get(
+      "offset",
+    );
+    const offset = arrow.dataset.offset;
+    updateParams({ offset: Number(currentOffset) + Number(offset) });
   }
 });

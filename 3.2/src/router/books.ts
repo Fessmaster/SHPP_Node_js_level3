@@ -3,6 +3,7 @@ import {
   getBookData,
   getBooksCollection,
   parserBookContent,
+  updateOrders,
   updateViews,
 } from "../utilities/utils.js";
 import { templates } from "../templater/templateLoader.js";
@@ -122,11 +123,18 @@ router.get("/books/:id", async (req, res) => {
   return res.status(200).send(renderPage);
 });
 
-router.post('/books/order', (req, res) => {
+router.post('/books/order', async (req, res) => {
   const bookID = Number(req.body.id);
   if (isNaN(bookID)){
     console.log(`Bad request in order`);
     return res.status(400).json({error: 'Bad request'})
+  }
+  try {
+    await updateOrders(bookID);
+    return res.status(200).json({status: 'ok'})    
+  } catch (error) {
+    console.log(`An error occurred while update orders`);
+    return res.status(500).json({status: 'error'})
   }
 })
 
