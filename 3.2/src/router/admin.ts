@@ -1,6 +1,11 @@
 import express from "express";
 import { Router, Response } from "express";
-import { getBooksCollection, deleteBook, addNewBook } from "../utilities/utils.js";
+import {
+  getBooksCollection,
+  deleteBook,
+  addNewBook,
+  getBooksCount,
+} from "../utilities/utils.js";
 import { templates } from "../templater/templateLoader.js";
 import { render } from "../templater/render.js";
 import { upload } from "../middlewares/uploadBook.js";
@@ -14,6 +19,7 @@ const router = Router();
 router.use(sessionConfig);
 
 router.get("/", async (req: MyRequest, res) => {
+  const limit = 10;
   if (!req.session.admin) {
     loginTemplate(req, res);
     return;
@@ -27,11 +33,29 @@ router.get("/", async (req: MyRequest, res) => {
   };
 
   try {
-    const booksArray = await getBooksCollection({ ...params, limit: 20 });
-    const adminTemplateHeader = templates?.get("admin-template-head")  || '';
-    const adminTemplateBody = templates?.get("admin-template-body") || '';
-    const bookTemplate = templates?.get("admin-template-books") || '';
-    const layout = templates?.get("layout") || '';
+    const booksArray = await getBooksCollection({ ...params, limit: limit });
+    const adminTemplateHeader = templates?.get("admin-template-head") || "";
+    const adminTemplateBody = templates?.get("admin-template-body") || "";
+    const bookTemplate = templates?.get("admin-template-books") || "";
+    const layout = templates?.get("layout") || "";
+
+    //Pagination
+    const currentOffset = Number(offset) || 0;
+    const booksCount = await getBooksCount();
+    const countOfPages = Math.ceil(booksCount / limit);
+
+    let paginationHTML = "";
+    for (let i = 0; i < countOfPages; i++) {
+      const nextOffset = i * limit;
+      const pageNumber = i + 1;
+      const isActive = currentOffset === nextOffset ? true : false
+
+      paginationHTML += `
+      <li class="page-item ${isActive ? 'active': ''}">
+        <a class="page-link" ${!isActive ? ' href="#"' : ""} data-offset=${nextOffset} ${isActive ? 'aria-current="page"' : ""}>${pageNumber}</a>
+      </li>
+      `
+    }    
 
     const booksList = booksArray.map((book) => {
       const authors = book.authors_list
@@ -46,14 +70,14 @@ router.get("/", async (req: MyRequest, res) => {
           img: book.img,
           authors_list: authors,
           views: book.views,
-          orders: book.orders
+          orders: book.orders,
         },
         bookTemplate,
       );
     });
 
     const renderedTemplateBody = render(
-      { books: booksList.join("") },
+      { books: booksList.join(""), pagination: paginationHTML },
       adminTemplateBody,
     );
 
@@ -67,7 +91,7 @@ router.get("/", async (req: MyRequest, res) => {
 
     return res.send(adminTemplate);
   } catch (error) {
-    const errorTemplate = templates?.get("500-error") || '';
+    const errorTemplate = templates?.get("500-error") || "";
     console.log(`An error occurred while render admin page`);
     return res.send(errorTemplate);
   }
@@ -167,13 +191,13 @@ router.post("/api/v1/logout/", async (req, res) => {
 
 function loginTemplate(reg: MyRequest, res: Response) {
   try {
-    const template = templates?.get("login") || '';
+    const template = templates?.get("login") || "";
     if (!template) {
       throw new Error();
     }
     return res.send(template);
   } catch (error) {
-    const errorTemplate = templates?.get("500-error") || '';
+    const errorTemplate = templates?.get("500-error") || "";
     console.log(`An error occurred while rendering login template ${error}`);
     return res.send(errorTemplate);
   }

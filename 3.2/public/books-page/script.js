@@ -1,28 +1,5 @@
 const BASE_URL = "http://localhost:3000";
 
-function orderBook(id) {
-  fetch(BASE_URL + "/books/order/", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ id: id }),
-  })
-    .then((res) => res.json())
-    .then((response) => {
-      if (response.status === "ok") {
-        const bookTitle = document.getElementById('title').innerHTML;
-        $('#modalMessageBody').text(`Книгу "${bookTitle}" ви можете забрати за адресою...`);
-        $('#model-order').modal('show');
-
-        console.log(`Книгу замовлено!`);
-      }
-    })
-    .catch((err) => {
-      console.log(`Some error while ordering book - ${err}`);
-    });
-}
-
 function sendQuery(obj) {
   const defaultQuery = {
     offset: 0,
@@ -56,23 +33,6 @@ searchField.addEventListener("keypress", (e) => {
     e.preventDefault();
     const searchParam = searchField.value;
     updateParams({ search: searchParam });
-  }
-});
-
-const contentBlock = document.getElementById("content");
-contentBlock.addEventListener("click", (e) => {
-  const params = e.target.closest("[data-filter]");
-  if (params) {
-    const filter = params.dataset.filter;
-    const value = params.dataset.value;
-    const query = updateParams({
-      [filter]: value,
-    });
-  }
-  const order = e.target.closest("[data-order]");
-  if (order) {
-    const id = order.dataset.order;
-    orderBook(id);
   }
 });
 

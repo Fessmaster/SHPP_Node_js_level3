@@ -34,15 +34,16 @@ router.get("/", async (req, res) => {
     const booksTemplateBody = templates?.get("books-template-body") || "";
     const cartTemplate = templates?.get("books-template-cart") || "";
     const layout = templates?.get("layout") || "";
-    const pagination = { 
-      arrow_back: 'style="visibility: hidden"', 
-      arrow_forward: 'style="visibility: hidden"'};
+    const pagination = {
+      arrow_back: 'style="visibility: hidden"',
+      arrow_forward: 'style="visibility: hidden"',
+    };
 
     const parsedBookArray = parserBookContent(booksArray);
 
-    if (booksArray.length > limit) {
+    if (parsedBookArray.length > limit) {
       pagination.arrow_forward = 'style="visibility: visible"';
-      booksArray.pop();
+      parsedBookArray.pop();
     }
     if (params.offset > 0) {
       pagination.arrow_back = 'style="visibility: visible"';
@@ -76,20 +77,20 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/books/:id", async (req, res) => {
-  const bookID = Number(req.params['id']);
-  if (isNaN(bookID)){   
+  const bookID = Number(req.params["id"]);
+  if (isNaN(bookID)) {
     console.log(`Bad request. Book ID is not a number`);
     return res.status(400).send(templates?.get("404-error") || "");
   }
   const bookData = await getBookData(bookID);
-  if (!bookData || bookData.length === 0 || !bookData[0]?.id) {    
+  if (!bookData || bookData.length === 0 || !bookData[0]?.id) {
     console.log(`Book with ID ${req.params["id"]} not found`);
     return res.status(404).send(templates?.get("404-error") || "");
   }
   const parsedData = parserBookContent(bookData)[0];
 
   try {
-    await updateViews(bookID);    
+    await updateViews(bookID);
   } catch (error) {
     console.log(`An error occurred while updated views`);
   }
@@ -123,19 +124,19 @@ router.get("/books/:id", async (req, res) => {
   return res.status(200).send(renderPage);
 });
 
-router.post('/books/order', async (req, res) => {
+router.post("/books/order", async (req, res) => {
   const bookID = Number(req.body.id);
-  if (isNaN(bookID)){
+  if (isNaN(bookID)) {
     console.log(`Bad request in order`);
-    return res.status(400).json({error: 'Bad request'})
+    return res.status(400).json({ error: "Bad request" });
   }
   try {
     await updateOrders(bookID);
-    return res.status(200).json({status: 'ok'})    
+    return res.status(200).json({ status: "ok" });
   } catch (error) {
     console.log(`An error occurred while update orders`);
-    return res.status(500).json({status: 'error'})
+    return res.status(500).json({ status: "error" });
   }
-})
+});
 
 export default router;

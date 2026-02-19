@@ -133,3 +133,25 @@ function logOut() {
   })
   .catch(err => console.log(`An error occurred: ${err}`))
 }
+
+function sendQuery(obj) {
+  const defaultQuery = {
+    offset: 0,
+    search: "",
+    author: "",
+    year: "",
+  };
+
+  const finalQuery = { ...defaultQuery, ...obj };
+  const params = new URLSearchParams(finalQuery);
+
+  window.location.href = BASE_URL + adminPath + `/?${params.toString()}`;
+}
+
+const paginationArea = document.getElementById('pagination')
+paginationArea.addEventListener('click', (e) => {
+  const page = e.target.closest('[data-offset]')
+  if (page){
+    sendQuery({offset: page.dataset.offset})
+  }
+})

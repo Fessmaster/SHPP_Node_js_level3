@@ -1,7 +1,10 @@
 import { pool } from "../config/db.js";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { IBook, IBooksDB, IBooksView, IParams } from "../types/types.js";
-import { verify } from "node:crypto";
+
+interface BookCount extends RowDataPacket{
+  total: number
+}
 
 /**
  *
@@ -27,7 +30,7 @@ WHERE books.delete_at IS NULL`;
 
   if (search) {
     sql += " AND books.title LIKE ?";
-    values.push(`%${search}%`);    
+    values.push(`%${search}%`);
   }
   if (author) {
     sql += " AND authors.id = ?";
@@ -201,7 +204,7 @@ export async function updateViews(id: number) {
 UPDATE books
 SET books.views = books.views + 1
 WHERE books.id = ?`;
-  try {    
+  try {
     const [updatedBook] = await pool.execute(sql, [id]);
   } catch (error) {
     console.log(`Error while update views`);
@@ -213,9 +216,17 @@ export async function updateOrders(id: number) {
 UPDATE books
 SET books.orders = books.orders + 1
 WHERE books.id = ?`;
-  try {    
+  try {
     const [updatedBook] = await pool.execute(sql, [id]);
   } catch (error) {
     console.log(`Error while update orders`);
   }
+}
+
+export async function getBooksCount() {
+  const sql = `
+SELECT COUNT(*) AS total FROM books
+`;
+  const [count] = await pool.execute<BookCount[]>(sql);
+  return count[0]?.total || 0;
 }
