@@ -1,9 +1,14 @@
 import { pool } from "../config/db.js";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { IBook, IBooksDB, IBooksView, IParams } from "../types/types.js";
+import {
+  IBook,
+  IBooksDB,
+  IBooksView,  
+  QueryParams,
+} from "../types/types.js";
 
-interface BookCount extends RowDataPacket{
-  total: number
+interface BookCount extends RowDataPacket {
+  total: number;
 }
 
 /**
@@ -11,7 +16,7 @@ interface BookCount extends RowDataPacket{
  * @param params
  * @returns
  */
-export async function getBooksCollection(params: IParams) {
+export async function getBooksCollection(params: QueryParams) {
   const { offset, search, author, year, limit } = params;
   const values = [];
   let sql = `
@@ -53,7 +58,6 @@ LIMIT ? OFFSET ?;
     return books;
   } catch (err) {
     console.log(`Bad sql request`);
-    console.log(err);
     return [];
   }
 }
@@ -133,8 +137,8 @@ VALUES
       bookFields,
     );
     const bookId = bookResult.insertId;
-
-    for (const authorName of authors) {
+    
+    for (const authorName of authors) {      
       const [authorResult] = await connection.execute<ResultSetHeader>(
         addAuthorSQL,
         [authorName],
@@ -227,6 +231,11 @@ export async function getBooksCount() {
   const sql = `
 SELECT COUNT(*) AS total FROM books
 `;
-  const [count] = await pool.execute<BookCount[]>(sql);
-  return count[0]?.total || 0;
+  try {
+    const [count] = await pool.execute<BookCount[]>(sql);
+    return count[0]?.total || 0;
+  } catch (error) {
+    console.log("Bad sql request");
+    return 0;
+  }
 }

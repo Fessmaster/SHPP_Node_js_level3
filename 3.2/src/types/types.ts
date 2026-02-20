@@ -51,3 +51,11 @@ interface AdminSession {
 export interface MyRequest extends Request {
   session: Session & Partial<AdminSession>;
 }
+
+export interface QueryParams {
+  search?: string;
+  offset?: number;
+  author?: number;
+  year?: number;
+  limit?:number
+}

@@ -27,7 +27,8 @@ function addBook() {
     document.getElementById("author2")?.value,
     document.getElementById("author3")?.value,
   ].filter((author) => author.trim());
-  formData.append("authors", JSON.stringify(authors));
+  const uniqAuthors = [... new Set(authors.map(author => author))]
+  formData.append("authors", JSON.stringify(uniqAuthors));
 
   if (!bookTitle || authors.length === 0) {
     alert(`Потрібно заповнити обов'язкові поля: Назва книги та Автор`);
