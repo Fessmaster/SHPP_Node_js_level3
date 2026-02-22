@@ -10,7 +10,7 @@ const dirname = path.dirname(filename);
 const pathToLogFile = path.join(dirname, 'logs', 'deleting_log.txt')
 const sql = `
 DELETE from books
-WHERE books.delete_at <= NOW() - INTERVAL 30 DAY`;
+WHERE books.delete_at <= NOW() - INTERVAL 5 MINUTE`;
 const date = new Date(Date.now()).toLocaleString('uk-UA');
 const successMessage = `
 -- ${date}
