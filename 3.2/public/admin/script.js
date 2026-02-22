@@ -1,6 +1,6 @@
-const BASE_URL = "http://localhost:3000";
-const adminPath = "/admin";
-const apiVersion = "/api/v1";
+const BASE_URL = "/";
+const adminPath = "admin/";
+const apiVersion = "api/v1";
 
 function addBook() {
   const routHandler = "/addBook";
@@ -146,7 +146,7 @@ function sendQuery(obj) {
   const finalQuery = { ...defaultQuery, ...obj };
   const params = new URLSearchParams(finalQuery);
 
-  window.location.href = BASE_URL + adminPath + `/?${params.toString()}`;
+  window.location.href = BASE_URL + adminPath + `?${params.toString()}`;
 }
 
 const paginationArea = document.getElementById('pagination')

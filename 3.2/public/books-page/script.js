@@ -1,4 +1,4 @@
-const BASE_URL = `http://${window.location.hostname}:3000`;
+const BASE_URL = `/`;
 
 function sendQuery(obj) {
   const defaultQuery = {
@@ -11,7 +11,7 @@ function sendQuery(obj) {
   const finalQuery = { ...defaultQuery, ...obj };
   const params = new URLSearchParams(finalQuery);
 
-  window.location.href = BASE_URL + `/?${params.toString()}`;
+  window.location.href = BASE_URL + `?${params.toString()}`;
 }
 
 function updateParams(updates) {
