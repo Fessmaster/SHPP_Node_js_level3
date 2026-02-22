@@ -1,6 +1,7 @@
 function handleLogin(){
   const login = document.getElementById('login')?.value;
   const password = document.getElementById('password')?.value;
+  const BASE_URL = `http://${window.location.hostname}:3000`
 
   if(!login && !password){
     alert('Потрібно ввести логін та пароль.')
@@ -9,8 +10,8 @@ function handleLogin(){
   
   // coding login ad password before sending
   const authorizationCredential = btoa(`${login}:${password}`)
-  
-  const URL = 'http://localhost:3000/admin/api/v1/login'
+    
+  const URL = BASE_URL + '/admin/api/v1/login'
   const request = JSON.stringify({login: login, password: password}) 
 
   fetch(URL, {
