@@ -1,7 +1,7 @@
-const BASE_URL = `http://${window.location.hostname}:3000`;
+const BASE_URL = `/`;
 
 function orderBook(id) {
-  fetch(BASE_URL + "/books/order/", {
+  fetch(BASE_URL + "books/order/", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
