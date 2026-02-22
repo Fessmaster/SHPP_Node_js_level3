@@ -1,6 +1,6 @@
 <div data-book-id="{{ id }}" class="book_item col-xs-6 col-sm-3 col-md-2 col-lg-2">
   <div class="book">
-    <a href="http://localhost:3000/books/{{ id }}"
+    <a href="/books/{{ id }}"
       ><img src="{{ img }}" alt="{{ title }}" />
       <div
         data-title="{{ title }}"
@@ -18,7 +18,7 @@
         </div>
       </div>
     </a>
-    <a href="http://localhost:3000/book/22">
+    <a href="/book/{{ id }}">
       <button type="button" class="details btn btn-success">Читать</button>
     </a>
   </div>
