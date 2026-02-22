@@ -36,7 +36,7 @@ function sendQuery(obj) {
   const finalQuery = { ...defaultQuery, ...obj };
   const params = new URLSearchParams(finalQuery);
 
-  window.location.href = BASE_URL + `/?${params.toString()}`;
+  window.location.href = `/?${params.toString()}`;
 }
 
 function updateParams(updates) {
