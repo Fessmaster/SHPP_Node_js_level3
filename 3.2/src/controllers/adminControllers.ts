@@ -40,7 +40,7 @@ export async function addNewBookToDB(req: Request, res: Response) {
       return res.status(200).json({ ok: true, id: result.id });
     }
   } catch (error: any) {
-    console.log(`Some error during adding new book: ${error}`);
+    console.log(`An error occurred while adding new book: ${error}`);
     return res.status(500).json({ error: error.message });
   }
 }

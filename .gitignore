@@ -141,5 +141,3 @@ vite.config.ts.timestamp-*
 .vite/
 
 # Other
-
-3.2/public/books-img/

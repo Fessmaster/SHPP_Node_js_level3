@@ -4,7 +4,7 @@ export const pool = mysql.createPool({
   host: 'localhost',
   user: process.env.DB_USER as string,
   password: process.env.DB_PASSWORD as string,
-  database: 'library',
+  database: process.env.DB_NAME as string,
   connectionLimit: 10,
   maxIdle: 10,
   idleTimeout: 60000,

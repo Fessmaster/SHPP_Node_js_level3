@@ -229,7 +229,7 @@ WHERE books.id = ?`;
 
 export async function getBooksCount() {
   const sql = `
-SELECT COUNT(*) AS total FROM books
+SELECT COUNT(*) AS total FROM books WHERE books.delete_at IS NULL
 `;
   try {
     const [count] = await pool.execute<BookCount[]>(sql);
