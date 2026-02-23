@@ -12,9 +12,12 @@ interface BookCount extends RowDataPacket {
 }
 
 /**
- *
- * @param params
- * @returns
+ * The function returns an array of objects from the database containing information
+ * about all books, excluding those marked for deletion.
+ * The query conditions are formed according to the provided input parameters
+ * 
+ * @param params - query parameters
+ * @returns - array of objects, the result of the SQL query execution, or an empty array
  */
 export async function getBooksCollection(params: QueryParams) {
   const { offset, search, author, year, limit } = params;
@@ -62,6 +65,13 @@ LIMIT ? OFFSET ?;
   }
 }
 
+/**
+ * The function returns data of a single book by its ID
+ * or an empty array
+ * 
+ * @param id - book ID
+ * @returns - data of the book found in the database
+ */
 export async function getBookData(id: number) {
   const sql = `
 SELECT
@@ -91,9 +101,11 @@ WHERE books.delete_at IS NULL AND books.id = ?
 }
 
 /**
- *
- * @param book
- * @returns
+ * The function accepts a data object and stores a new book and its authors
+ * in the database, and sets the relationships between them
+ * 
+ * @param book - data object for the database
+ * @returns - result of the function execution and the ID of the added book
  */
 export async function addNewBook(book: IBook) {
   const connection = await pool.getConnection();
@@ -161,9 +173,11 @@ VALUES
 }
 
 /**
- *
- * @param id
- * @returns
+ * The function accepts a book ID and marks it as deleted in the database
+ * by setting the current time in the corresponding field.
+ * 
+ * @param id - book ID
+ * @returns - returns the result of the function execution, 1 if successful, 0 otherwise
  */
 export async function deleteBook(id: number) {
   const deleteSQL = `
@@ -177,32 +191,11 @@ export async function deleteBook(id: number) {
 }
 
 /**
- *
- * @param arr
- * @returns
+ * The function accepts a book ID and increments the view counter
+ * in the database
+ * 
+ * @param id - book ID
  */
-export function parserBookContent(arr: IBooksDB[]): IBooksView[] {
-  try {
-    const booksArray = arr.map((book) => {
-      return {
-        ...book,
-        // parsing string with authors data from DB
-        authors_list: book.authors_list.split("|").map((authorsData) => {
-          const [id, author] = authorsData.split("****");
-          return {
-            id: Number(id),
-            author: author,
-          };
-        }),
-      };
-    });
-    return booksArray;
-  } catch (error) {
-    console.log(`Array is empty`);
-    return [];
-  }
-}
-
 export async function updateViews(id: number) {
   const sql = `
 UPDATE books
@@ -215,6 +208,13 @@ WHERE books.id = ?`;
   }
 }
 
+
+/**
+ * The function accepts a book ID and increments the order counter
+ * in the database
+ * 
+ * @param id - book ID
+ */
 export async function updateOrders(id: number) {
   const sql = `
 UPDATE books
@@ -227,6 +227,12 @@ WHERE books.id = ?`;
   }
 }
 
+/**
+ * The function returns the number of available books in the database
+ * that are not marked for deletion
+ * 
+ * @returns - returns the number of books
+ */
 export async function getBooksCount() {
   const sql = `
 SELECT COUNT(*) AS total FROM books WHERE books.delete_at IS NULL

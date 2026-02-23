@@ -119,13 +119,19 @@ export async function renderAdminPage(req: Request, res: Response) {
       layout,
     );
 
-    return res.send(adminTemplate);
+    return res.status(200).send(adminTemplate);
   } catch (error) {    
     console.log(`An error occurred while render admin page`);
     return renderExceptionPage(res, 500);
   }
 }
 
+/**
+ * 
+ * @param req 
+ * @param res 
+ * @returns 
+ */
 export async function deleteBookFromDB(req: Request, res: Response) {
   if (req.body.id) {
     const deletingBook = await deleteBook(parseInt(req.body.id));

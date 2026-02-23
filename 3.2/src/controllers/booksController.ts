@@ -1,14 +1,13 @@
 import { Request, Response } from "express";
 import {
   getBookData,
-  getBooksCollection,
-  parserBookContent,
+  getBooksCollection,  
   updateOrders,
   updateViews,
 } from "../repositories/repositories.js";
 import { templates } from "../templater/templateLoader.js";
 import { render } from "../templater/render.js";
-import { validateParams } from "../utils/utils.js";
+import { parserBookContent, validateParams } from "../utils/utils.js";
 import { renderExceptionPage } from "./exceptionsControllers.js";
 
 export async function renderBooksPage(req: Request, res: Response) {

@@ -1,6 +1,13 @@
 import path from "node:path";
 import fs from "fs/promises"
 
+/**
+ * The function loads all templates from the specified directory and stores them
+ * in a Map collection in the format {"fileName":"template"}
+ * 
+ * @returns - collection of templates
+ */
+
 async function templateLoader() {
   const templateDir = path.join(process.cwd(), './views');
   const templateCollection = new Map();
